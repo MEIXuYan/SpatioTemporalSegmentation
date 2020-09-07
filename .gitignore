@@ -18,3 +18,4 @@ callgrind.out*
 
 # Misc
 .DS_Store
+.vscode
