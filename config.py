@@ -116,7 +116,7 @@ data_arg.add_argument('--train_limit_numpoints', type=int, default=0)
 data_arg.add_argument(
     '--synthia_path',
     type=str,
-    default='/home/chrischoy/datasets/Synthia/Synthia4D',
+    default='',
     help='Point Cloud dataset root dir')
 # For temporal sequences
 data_arg.add_argument(
@@ -130,13 +130,13 @@ data_arg.add_argument('--temporal_rand_numseq', type=str2bool, default=False)
 data_arg.add_argument(
     '--scannet_path',
     type=str,
-    default='/home/chrischoy/datasets/scannet/scannet_preprocessed',
+    default='',
     help='Scannet online voxelization dataset root dir')
 
 data_arg.add_argument(
     '--stanford3d_path',
     type=str,
-    default='/home/chrischoy/datasets/Stanford3D',
+    default='',
     help='Stanford precropped dataset root dir')
 
 # Training / test parameters

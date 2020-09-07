@@ -9,8 +9,8 @@ from lib.pc_utils import save_point_cloud
 
 import MinkowskiEngine as ME
 
-STANFORD_3D_IN_PATH = '/cvgl/group/Stanford3dDataset_v1.2/'
-STANFORD_3D_OUT_PATH = '/home/chrischoy/datasets/Stanford3D'
+STANFORD_3D_IN_PATH = '/media/xuyan/dataset_disk/s3dis/Stanford3dDataset_v1.2_Aligned_Version/'
+STANFORD_3D_OUT_PATH = '/home/xuyan/s3dis_ply'
 
 STANFORD_3D_TO_SEGCLOUD_LABEL = {
     4: 0,
