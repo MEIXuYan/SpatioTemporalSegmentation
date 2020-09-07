@@ -60,6 +60,7 @@ class Stanford3DDatasetConverter:
 
     txtfiles = glob.glob(os.path.join(root_path, '*/*/*.txt'))
     for txtfile in tqdm(txtfiles):
+      print(txtfile)
       file_sp = os.path.normpath(txtfile).split(os.path.sep)
       target_path = os.path.join(out_path, file_sp[-3])
       out_file = os.path.join(target_path, file_sp[-2] + '.ply')
