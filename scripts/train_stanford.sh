@@ -9,7 +9,8 @@ set -o pipefail
 export PYTHONUNBUFFERED="True"
 export CUDA_VISIBLE_DEVICES=$1
 
-export BATCH_SIZE=${BATCH_SIZE:-6}
+# batchsize 6
+export BATCH_SIZE=${BATCH_SIZE:-4}
 
 export TIME=$(date +"%Y-%m-%d_%H-%M-%S")
 
