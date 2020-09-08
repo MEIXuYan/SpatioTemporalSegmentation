@@ -4,9 +4,11 @@ import datasets.scannet as scannet
 
 DATASETS = []
 
+
 # import all class
 def add_datasets(module):
-    DATASETS.extend([getattr(module, a) for a in dir(module) if 'Dataset' in a])
+    DATASETS.extend(
+        [getattr(module, a) for a in dir(module) if 'Dataset' in a])
 
 
 add_datasets(stanford)

@@ -26,9 +26,9 @@ import argparse
 import numpy as np
 from urllib.request import urlretrieve
 try:
-  import open3d as o3d
+    import open3d as o3d
 except ImportError:
-  raise ImportError('Please install open3d with `pip install open3d`.')
+    raise ImportError('Please install open3d with `pip install open3d`.')
 
 import torch
 import MinkowskiEngine as ME
@@ -36,13 +36,17 @@ import MinkowskiEngine as ME
 from models.res16unet import Res16UNet34C
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--weights', type=str, default='MinkUNet34C-train-conv1-5.pth')
+parser.add_argument('--weights',
+                    type=str,
+                    default='MinkUNet34C-train-conv1-5.pth')
 parser.add_argument('--file_name', type=str, default='1.ply')
 parser.add_argument('--bn_momentum', type=float, default=0.05)
 parser.add_argument('--voxel_size', type=float, default=0.02)
 parser.add_argument('--conv1_kernel_size', type=int, default=5)
 
-VALID_CLASS_IDS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36, 39]
+VALID_CLASS_IDS = [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36, 39
+]
 
 COLOR_MAP = {
     0: (0., 0., 0.),
@@ -88,72 +92,75 @@ COLOR_MAP = {
 
 
 def download(config):
-  if not os.path.isfile(config.file_name):
-    print('Downloading the weights and a room ply file...')
-    urlretrieve(
-        "https://node1.chrischoy.org/data/publications/minknet/MinkUNet34C-train-conv1-5.pth",
-        'MinkUNet34C-train-conv1-5.pth')
-    urlretrieve(f"http://cvgl.stanford.edu/data2/minkowskiengine/{config.file_name}",
-                config.file_name)
+    if not os.path.isfile(config.file_name):
+        print('Downloading the weights and a room ply file...')
+        urlretrieve(
+            "https://node1.chrischoy.org/data/publications/minknet/MinkUNet34C-train-conv1-5.pth",
+            'MinkUNet34C-train-conv1-5.pth')
+        urlretrieve(
+            f"http://cvgl.stanford.edu/data2/minkowskiengine/{config.file_name}",
+            config.file_name)
 
 
 def load_file(file_name, voxel_size):
-  pcd = o3d.io.read_point_cloud(file_name)
-  coords = np.array(pcd.points)
-  feats = np.array(pcd.colors)
+    pcd = o3d.io.read_point_cloud(file_name)
+    coords = np.array(pcd.points)
+    feats = np.array(pcd.colors)
 
-  quantized_coords = np.floor(coords / voxel_size)
-  inds = ME.utils.sparse_quantize(quantized_coords, return_index=True)
+    quantized_coords = np.floor(coords / voxel_size)
+    inds = ME.utils.sparse_quantize(quantized_coords, return_index=True)
 
-  return quantized_coords[inds], feats[inds], pcd
+    return quantized_coords[inds], feats[inds], pcd
 
 
 def generate_input_sparse_tensor(file_name, voxel_size=0.05):
-  # Create a batch, this process is done in a data loader during training in parallel.
-  batch = [load_file(file_name, voxel_size)]
-  coordinates_, featrues_, pcds = list(zip(*batch))
-  coordinates, features = ME.utils.sparse_collate(coordinates_, featrues_)
+    # Create a batch, this process is done in a data loader during training in parallel.
+    batch = [load_file(file_name, voxel_size)]
+    coordinates_, featrues_, pcds = list(zip(*batch))
+    coordinates, features = ME.utils.sparse_collate(coordinates_, featrues_)
 
-  # Normalize features and create a sparse tensor
-  return coordinates, (features - 0.5).float()
+    # Normalize features and create a sparse tensor
+    return coordinates, (features - 0.5).float()
 
 
 if __name__ == '__main__':
-  config = parser.parse_args()
-  download(config)
-  device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    config = parser.parse_args()
+    download(config)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-  # Define a model and load the weights
-  model = Res16UNet34C(3, 20, config).to(device)
-  model_dict = torch.load(config.weights)
-  model.load_state_dict(model_dict['state_dict'])
-  model.eval()
+    # Define a model and load the weights
+    model = Res16UNet34C(3, 20, config).to(device)
+    model_dict = torch.load(config.weights)
+    model.load_state_dict(model_dict['state_dict'])
+    model.eval()
 
-  # Measure time
-  with torch.no_grad():
-    coordinates, features = generate_input_sparse_tensor(
-        config.file_name, voxel_size=config.voxel_size)
+    # Measure time
+    with torch.no_grad():
+        coordinates, features = generate_input_sparse_tensor(
+            config.file_name, voxel_size=config.voxel_size)
+
+        # Feed-forward pass and get the prediction
+        sinput = ME.SparseTensor(features, coords=coordinates).to(device)
+        soutput = model(sinput)
 
     # Feed-forward pass and get the prediction
-    sinput = ME.SparseTensor(features, coords=coordinates).to(device)
-    soutput = model(sinput)
+    _, pred = soutput.F.max(1)
+    pred = pred.cpu().numpy()
 
-  # Feed-forward pass and get the prediction
-  _, pred = soutput.F.max(1)
-  pred = pred.cpu().numpy()
+    # Map color
+    colors = np.array([COLOR_MAP[VALID_CLASS_IDS[l]] for l in pred])
 
-  # Map color
-  colors = np.array([COLOR_MAP[VALID_CLASS_IDS[l]] for l in pred])
+    # Create a point cloud file
+    pred_pcd = o3d.geometry.PointCloud()
+    coordinates = soutput.C.numpy()[:, 1:]  # first column is the batch index
+    pred_pcd.points = o3d.utility.Vector3dVector(coordinates *
+                                                 config.voxel_size)
+    pred_pcd.colors = o3d.utility.Vector3dVector(colors / 255)
 
-  # Create a point cloud file
-  pred_pcd = o3d.geometry.PointCloud()
-  coordinates = soutput.C.numpy()[:, 1:]  # first column is the batch index
-  pred_pcd.points = o3d.utility.Vector3dVector(coordinates * config.voxel_size)
-  pred_pcd.colors = o3d.utility.Vector3dVector(colors / 255)
+    # Move the original point cloud
+    pcd = o3d.io.read_point_cloud(config.file_name)
+    pcd.points = o3d.utility.Vector3dVector(
+        np.array(pcd.points) + np.array([0, 5, 0]))
 
-  # Move the original point cloud
-  pcd = o3d.io.read_point_cloud(config.file_name)
-  pcd.points = o3d.utility.Vector3dVector(np.array(pcd.points) + np.array([0, 5, 0]))
-
-  # Visualize the input point cloud and the prediction
-  o3d.visualization.draw_geometries([pcd, pred_pcd])
+    # Visualize the input point cloud and the prediction
+    o3d.visualization.draw_geometries([pcd, pred_pcd])
