@@ -44,6 +44,8 @@ class Stanford3DDatasetConverter:
     # Read txt file and parse its content.
     with open(txtfile) as f:
       pointcloud = [l.split() for l in f]
+    # debug
+    print(txtfile)
     # Load point cloud to named numpy array.
     pointcloud = np.array(pointcloud).astype(np.float32)
     assert pointcloud.shape[1] == 6
@@ -60,6 +62,7 @@ class Stanford3DDatasetConverter:
 
     txtfiles = glob.glob(os.path.join(root_path, '*/*/*.txt'))
     for txtfile in tqdm(txtfiles):
+      # debug
       print(txtfile)
       file_sp = os.path.normpath(txtfile).split(os.path.sep)
       target_path = os.path.join(out_path, file_sp[-3])
