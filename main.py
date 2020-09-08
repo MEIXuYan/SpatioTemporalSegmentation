@@ -16,6 +16,7 @@ from easydict import EasyDict as edict
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'lib'))
+sys.path.append(os.path.join(BASE_DIR, 'lib/datasets'))
 #sys.path.append(os.path.join(BASE_DIR, 'utils'))
 
 
