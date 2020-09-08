@@ -11,6 +11,7 @@ __pycache__/
 
 # Training
 outputs/
+data/
 
 # Profiling
 callgrind.out*

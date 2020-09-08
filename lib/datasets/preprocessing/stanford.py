@@ -1,3 +1,4 @@
+# first line in Area_5/Annotations/table_3.txt is empty
 import glob
 import numpy as np
 import os
