@@ -7,7 +7,7 @@ set -e
 set -o pipefail
 
 export PYTHONUNBUFFERED="True"
-export CUDA_VISIBLE_DEVICES=$0
+export CUDA_VISIBLE_DEVICES=$1
 
 export BATCH_SIZE=${BATCH_SIZE:-6}
 
