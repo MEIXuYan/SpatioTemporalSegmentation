@@ -9,16 +9,17 @@ except RuntimeError:
 
 import os
 import sys
-import json
-import logging
-from easydict import EasyDict as edict
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'lib'))
 sys.path.append(os.path.join(BASE_DIR, 'lib/datasets'))
 #sys.path.append(os.path.join(BASE_DIR, 'utils'))
+print(BASE_DIR)
 
+import json
+import logging
+from easydict import EasyDict as edict
 
 # Torch packages
 import torch
