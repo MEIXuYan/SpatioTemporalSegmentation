@@ -31,7 +31,7 @@ from lib.test import test
 from lib.train import train
 from lib.utils import load_state_with_same_shape, get_torch_device, count_parameters
 from lib.dataset import initialize_data_loader
-from lib.datasets import load_dataset
+from datasets import load_dataset
 
 from models import load_model, load_wrapper
 

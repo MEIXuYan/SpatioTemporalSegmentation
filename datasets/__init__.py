@@ -1,10 +1,10 @@
-import lib.datasets.synthia as synthia
-import lib.datasets.stanford as stanford
-import lib.datasets.scannet as scannet
+import datasets.synthia as synthia
+import datasets.stanford as stanford
+import datasets.scannet as scannet
 
 DATASETS = []
 
-
+# import all class
 def add_datasets(module):
     DATASETS.extend([getattr(module, a) for a in dir(module) if 'Dataset' in a])
 
