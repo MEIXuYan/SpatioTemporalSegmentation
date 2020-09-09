@@ -1,4 +1,6 @@
 # first line in Area_5/Annotations/table_3.txt is empty
+# s3dis : convert txt pointcloud and label files to ply files
+# ME sparse_quantize
 import glob
 import numpy as np
 import os
@@ -13,6 +15,8 @@ import MinkowskiEngine as ME
 STANFORD_3D_IN_PATH = '/media/xuyan/dataset_disk/s3dis/Stanford3dDataset_v1.2_Aligned_Version/'
 STANFORD_3D_OUT_PATH = '/home/xuyan/s3dis_ply'
 
+
+# label projection
 STANFORD_3D_TO_SEGCLOUD_LABEL = {
     4: 0,
     8: 1,
@@ -56,7 +60,8 @@ class Stanford3DDatasetConverter:
 
     @classmethod
     def convert_to_ply(cls, root_path, out_path):
-        """Convert Stanford3DDataset to PLY format that is compatible with
+    """
+    Convert Stanford3DDataset to PLY format that is compatible with
     Synthia dataset. Assumes file structure as given by the dataset.
     Outputs the processed PLY files to `STANFORD_3D_OUT_PATH`.
     """
@@ -65,6 +70,7 @@ class Stanford3DDatasetConverter:
         for txtfile in tqdm(txtfiles):
             # debug
             print(txtfile)
+            # dir split
             file_sp = os.path.normpath(txtfile).split(os.path.sep)
             target_path = os.path.join(out_path, file_sp[-3])
             out_file = os.path.join(target_path, file_sp[-2] + '.ply')
@@ -90,10 +96,13 @@ class Stanford3DDatasetConverter:
             if len(coords) == 0:
                 print(txtfile, ' has 0 files.')
             else:
-                # Concat
+                # Concat axis 0
                 coords = np.concatenate(coords, 0)
                 feats = np.concatenate(feats, 0)
                 labels = np.concatenate(labels, 0)
+
+                # ME sparse_quantize
+                # sampling ?
                 inds, collabels = ME.utils.sparse_quantize(
                     coords,
                     feats,
@@ -105,7 +114,7 @@ class Stanford3DDatasetConverter:
                 pointcloud = np.concatenate(
                     (coords[inds], feats[inds], collabels[:, None]), axis=1)
 
-                # Write ply file.
+                # Write ply file : data and filename
                 mkdir_p(target_path)
                 save_point_cloud(pointcloud,
                                  out_file,
