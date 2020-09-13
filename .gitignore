@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.o
 *.so
+*.txt
 
 # Text edits
 *.swp

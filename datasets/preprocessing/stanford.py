@@ -60,11 +60,11 @@ class Stanford3DDatasetConverter:
 
     @classmethod
     def convert_to_ply(cls, root_path, out_path):
-    """
-    Convert Stanford3DDataset to PLY format that is compatible with
-    Synthia dataset. Assumes file structure as given by the dataset.
-    Outputs the processed PLY files to `STANFORD_3D_OUT_PATH`.
-    """
+        """
+        Convert Stanford3DDataset to PLY format that is compatible with
+        Synthia dataset. Assumes file structure as given by the dataset.
+        Outputs the processed PLY files to `STANFORD_3D_OUT_PATH`.
+        """
 
         txtfiles = glob.glob(os.path.join(root_path, '*/*/*.txt'))
         for txtfile in tqdm(txtfiles):
